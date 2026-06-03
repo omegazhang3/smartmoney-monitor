@@ -18,11 +18,31 @@ export function loadState() {
   }
   
   return {
+    // OKX Smart Money
     traders: {},        // { authorId: { info, positions, lastUpdate } }
     signals: {},        // { instCcy: { overview, trend, lastUpdate } }
     watchlist: [],      // [ authorId, ... ]
     lastDiscovery: null,
-    lastMonitor: null
+    lastMonitor: null,
+    
+    // EVM
+    evmWhales: [],
+    evmWallets: {},     // { address: { portfolio, lastUpdate } }
+    lastEvmScan: null,
+    
+    // Solana
+    solanaWhales: [],
+    solanaWallets: {},  // { address: { portfolio, lastUpdate } }
+    lastSolanaScan: null,
+    
+    // Hyperliquid
+    hyperliquidAccounts: {},  // { address: { state, lastUpdate } }
+    hyperliquidFills: {},     // { address: { fills, lastUpdate } }
+    hyperliquidReviews: {},   // { address: { review, lastUpdate } }
+    hyperliquidSpot: {},      // { address: { balances, lastUpdate } }
+    
+    // Wallet watchlist (multi-chain)
+    walletWatchlist: []  // { address, chain, label }
   };
 }
 
@@ -75,6 +95,33 @@ export function addToWatchlist(state, authorId) {
  */
 export function removeFromWatchlist(state, authorId) {
   state.watchlist = state.watchlist.filter(id => id !== authorId);
+  return state;
+}
+
+/**
+ * Add wallet to watchlist (multi-chain)
+ */
+export function addWalletToWatchlist(state, address, chain, label = '') {
+  if (!state.walletWatchlist) state.walletWatchlist = [];
+  
+  const exists = state.walletWatchlist.find(w => w.address === address && w.chain === chain);
+  if (!exists) {
+    state.walletWatchlist.push({
+      address,
+      chain,
+      label: label || `${address.slice(0, 8)}...${address.slice(-6)}`,
+      addedAt: new Date().toISOString()
+    });
+  }
+  return state;
+}
+
+/**
+ * Remove wallet from watchlist
+ */
+export function removeWalletFromWatchlist(state, address, chain) {
+  if (!state.walletWatchlist) state.walletWatchlist = [];
+  state.walletWatchlist = state.walletWatchlist.filter(w => !(w.address === address && w.chain === chain));
   return state;
 }
 

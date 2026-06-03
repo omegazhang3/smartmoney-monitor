@@ -156,6 +156,154 @@ export function formatSignalMessage(signals) {
 }
 
 /**
+ * Format EVM whale alert message
+ */
+export function formatEvmWhaleMessage(whales) {
+  if (!whales || whales.length === 0) return null;
+  
+  let msg = `🐋 <b>EVM 巨鲸警报</b>\n⏰ ${formatTime()}\n\n`;
+  
+  const chainEmojis = {
+    ethereum: '⟠',
+    bsc: '🔶',
+    base: '🔵',
+    arbitrum: '🔷',
+    polygon: '🟣',
+    optimism: '🔴',
+    avalanche: '🔺',
+    zksync: '⚡'
+  };
+  
+  for (const whale of whales.slice(0, 5)) {
+    const emoji = chainEmojis[whale.chain] || '⛓️';
+    msg += `${emoji} <b>${whale.chain.toUpperCase()}</b>\n`;
+    msg += `💰 ${formatNumber(whale.amount)} ${whale.token} (${formatCurrency(whale.usdValue)})\n`;
+    msg += `📤 <code>${whale.from}</code>\n`;
+    msg += `📥 <code>${whale.to}</code>\n\n`;
+  }
+  
+  if (whales.length > 5) {
+    msg += `... 还有 ${whales.length - 5} 笔转账\n`;
+  }
+  
+  return msg;
+}
+
+/**
+ * Format Solana whale alert message
+ */
+export function formatSolanaWhaleMessage(whales) {
+  if (!whales || whales.length === 0) return null;
+  
+  let msg = `🐋 <b>Solana 巨鲸警报</b>\n⏰ ${formatTime()}\n\n`;
+  
+  for (const whale of whales.slice(0, 5)) {
+    msg += `☀️ <b>Solana</b>\n`;
+    msg += `💰 ${formatNumber(whale.amount)} SOL (${formatCurrency(whale.usdValue)})\n`;
+    msg += `📤 <code>${whale.from}</code>\n`;
+    msg += `📥 <code>${whale.to}</code>\n\n`;
+  }
+  
+  if (whales.length > 5) {
+    msg += `... 还有 ${whales.length - 5} 笔转账\n`;
+  }
+  
+  return msg;
+}
+
+/**
+ * Format Hyperliquid account update message
+ */
+export function formatHyperliquidAccountMessage(address, account) {
+  if (!account) return null;
+  
+  let msg = `📊 <b>Hyperliquid 账户更新</b>\n`;
+  msg += `⏰ ${formatTime()}\n`;
+  msg += `🆔 <code>${address}</code>\n\n`;
+  
+  msg += `💰 总名义价值: ${formatCurrency(account.totalNotional)}\n`;
+  msg += `📈 未实现盈亏: ${formatCurrency(account.totalUpnl)}\n`;
+  msg += `📦 持仓数: ${account.positions.length}\n\n`;
+  
+  if (account.positions.length > 0) {
+    msg += `<b>当前持仓:</b>\n`;
+    for (const pos of account.positions) {
+      const sideEmoji = pos.side === 'long' ? '📈' : '📉';
+      msg += `${sideEmoji} ${pos.coin} ${pos.side.toUpperCase()} ${formatNumber(pos.size)} @ ${formatCurrency(pos.entryPrice)}\n`;
+    }
+  }
+  
+  return msg;
+}
+
+/**
+ * Format Hyperliquid review message
+ */
+export function formatHyperliquidReviewMessage(address, review) {
+  if (!review) return null;
+  
+  let msg = `📊 <b>Hyperliquid 交易复盘</b>\n`;
+  msg += `⏰ ${formatTime()}\n`;
+  msg += `🆔 <code>${address}</code>\n\n`;
+  
+  msg += `📅 周期: ${review.period || '-'}\n`;
+  msg += `💰 总盈亏: ${formatCurrency(review.totalPnl)}\n`;
+  msg += `💸 总手续费: ${formatCurrency(review.totalFees)}\n`;
+  msg += `✅ 胜: ${review.winCount} | ❌ 负: ${review.lossCount}\n`;
+  msg += `📈 胜率: ${formatPercent(review.winRate)}\n\n`;
+  
+  if (review.coins.length > 0) {
+    msg += `<b>币种明细:</b>\n`;
+    for (const coin of review.coins.sort((a, b) => b.pnl - a.pnl).slice(0, 5)) {
+      const emoji = coin.pnl >= 0 ? '✅' : '❌';
+      msg += `${emoji} ${coin.coin}: ${formatCurrency(coin.pnl)}\n`;
+    }
+  }
+  
+  if (review.insights.length > 0) {
+    msg += `\n<b>💡 洞察:</b>\n`;
+    for (const insight of review.insights.slice(0, 3)) {
+      msg += `${insight}\n`;
+    }
+  }
+  
+  return msg;
+}
+
+/**
+ * Format multi-chain wallet update message
+ */
+export function formatWalletUpdateMessage(address, chain, oldBalance, newBalance) {
+  const change = newBalance - oldBalance;
+  const changePercent = oldBalance > 0 ? (change / oldBalance * 100) : 0;
+  
+  const chainEmojis = {
+    ethereum: '⟠',
+    bsc: '🔶',
+    base: '🔵',
+    arbitrum: '🔷',
+    polygon: '🟣',
+    optimism: '🔴',
+    avalanche: '🔺',
+    zksync: '⚡',
+    solana: '☀️',
+    hyperliquid: '⚡'
+  };
+  
+  const emoji = chainEmojis[chain] || '⛓️';
+  
+  let msg = `👛 <b>钱包余额变化</b>\n`;
+  msg += `⏰ ${formatTime()}\n`;
+  msg += `${emoji} ${chain.toUpperCase()}\n`;
+  msg += `🆔 <code>${address}</code>\n\n`;
+  
+  msg += `💰 余额: ${formatCurrency(oldBalance)} → ${formatCurrency(newBalance)}\n`;
+  msg += `📊 变化: ${change >= 0 ? '+' : ''}${formatCurrency(change)} (${changePercent >= 0 ? '+' : ''}${changePercent.toFixed(2)}%)\n`;
+  
+  return msg;
+}
+
+/**
  * Format error message
  */
 export function formatErrorMessage(context, error) {
