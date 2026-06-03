@@ -1,0 +1,25 @@
+{
+  "name": "okx-smartmoney-monitor",
+  "version": "1.0.0",
+  "description": "OKX Smart Money wallet discovery and monitoring tool",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "discover": "node index.js discover",
+    "monitor": "node index.js monitor",
+    "signal": "node index.js signal",
+    "status": "node index.js status",
+    "history": "node index.js history"
+  },
+  "keywords": [
+    "okx",
+    "smartmoney",
+    "crypto",
+    "monitoring",
+    "trading"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "dotenv": "^17.4.2"
+  }
+}
