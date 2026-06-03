@@ -132,7 +132,10 @@ node index.js status
 ```bash
 # Telegram notifications (optional)
 TELEGRAM_BOT_TOKEN=
-TELEGRAM_CHAT_ID=
+TELE...n
+
+# Monitor interval (minutes)
+MONITOR_INTERVAL=5
 
 # OKX Smart Money filters
 MIN_PNL=10000
@@ -142,9 +145,6 @@ SORT_BY=pnl
 PERIOD=7
 WATCH_INSTRUMENTS=BTC,ETH,SOL
 SIGNAL_CHANGE_THRESHOLD=10
-
-# Monitor interval (minutes)
-MONITOR_INTERVAL=5
 
 # EVM whale detection
 EVM_MIN_USD=100000
