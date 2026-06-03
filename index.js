@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 import { config } from 'dotenv';
+import { execSync } from 'child_process';
 import { loadState, saveState, removeFromWatchlist, exportWatchlist, addWalletToWatchlist, removeWalletFromWatchlist } from './src/state.js';
 import { discoverTraders, getTraderDetails } from './src/discover.js';
 import { monitorPositions, startMonitorLoop } from './src/monitor.js';
@@ -13,6 +14,42 @@ import { sendTelegram, formatEvmWhaleMessage, formatSolanaWhaleMessage, formatHy
 
 // Load .env
 config();
+
+/**
+ * Check OKX authentication status
+ */
+function checkOkxAuth() {
+  try {
+    const output = execSync('okx config show --json 2>/dev/null', { encoding: 'utf8', timeout: 5000 });
+    const config = JSON.parse(output);
+    
+    // Check if there's a live profile (not demo)
+    const profiles = config.profiles || {};
+    const hasLiveProfile = Object.values(profiles).some(p => !p.demo && p.api_key);
+    
+    // Check OAuth status
+    let oauthStatus = 'not_logged_in';
+    try {
+      const authOutput = execSync('okx auth status --json 2>/dev/null', { encoding: 'utf8', timeout: 5000 });
+      const auth = JSON.parse(authOutput);
+      oauthStatus = auth.status || 'not_logged_in';
+    } catch (e) {
+      // OAuth not available
+    }
+    
+    return {
+      hasLiveProfile,
+      oauthStatus,
+      isAuthenticated: hasLiveProfile || oauthStatus === 'logged_in'
+    };
+  } catch (error) {
+    return {
+      hasLiveProfile: false,
+      oauthStatus: 'not_available',
+      isAuthenticated: false
+    };
+  }
+}
 
 // Build config from env
 const appConfig = {
@@ -56,13 +93,18 @@ const args = process.argv.slice(2);
 const command = args[0];
 
 function printHelp() {
+  const okxAuth = checkOkxAuth();
+  const okxStatus = okxAuth.isAuthenticated ? '✅ 已认证' : '❌ 未认证（跳过OKX功能）';
+  
   print(`
 🧠 Smart Money Monitor - 聪明钱发现与监控工具
 ${'='.repeat(60)}
 
+OKX 状态: ${okxStatus}
+
 用法: node index.js <command> [options]
 
-=== OKX Smart Money (CEX) ===
+=== OKX Smart Money (CEX) ${okxAuth.isAuthenticated ? '' : '[需要认证]'} ===
   discover                发现聪明钱交易员
   details <id1,id2,...>   查看交易员详情
   monitor                 单次监控持仓变化
@@ -73,19 +115,19 @@ ${'='.repeat(60)}
   history <id>            查看交易员历史平仓
   list                    查看 OKX 监控列表
 
-=== EVM 链上巨鲸 (8条链) ===
+=== EVM 链上巨鲸 (8条链) [无需认证] ===
   evm-whale               检测 EVM 链上大额转账
   evm-wallet <address>    查看 EVM 钱包持仓
   evm-multichain <addr>   多链扫描同一地址
   evm-chains              显示支持的 EVM 链
 
-=== Solana 链上巨鲸 ===
+=== Solana 链上巨鲸 [无需认证] ===
   sol-whale               检测 Solana 大额 SOL 转账
   sol-wallet <address>    查看 Solana 钱包持仓
   sol-token <mint>        查看代币信息和大户
   sol-stats               Solana 网络状态
 
-=== Hyperliquid DEX ===
+=== Hyperliquid DEX [无需认证] ===
   hl-state <address>      查看账户持仓状态
   hl-fills <address>      查看成交记录
   hl-review <address>     生成交易复盘
@@ -110,6 +152,23 @@ ${'='.repeat(60)}
 `);
 }
 
+/**
+ * Require OKX authentication
+ */
+function requireOkxAuth() {
+  const okxAuth = checkOkxAuth();
+  if (!okxAuth.isAuthenticated) {
+    print('❌ OKX 未认证，无法使用此功能');
+    print('   请先配置 OKX 认证：');
+    print('   - OAuth 登录: okx auth login');
+    print('   - 或添加 Live API Key: okx config add');
+    print('');
+    print('   💡 提示: EVM、Solana、Hyperliquid 功能无需 OKX 认证');
+    return false;
+  }
+  return true;
+}
+
 async function main() {
   const state = loadState();
   
@@ -119,6 +178,7 @@ async function main() {
   switch (command) {
     // ==================== OKX Smart Money ====================
     case 'discover': {
+      if (!requireOkxAuth()) break;
       const limitIdx = args.indexOf('--limit');
       const limit = limitIdx >= 0 ? parseInt(args[limitIdx + 1]) : 20;
       await discoverTraders({ ...appConfig, limit }, state);
@@ -126,6 +186,7 @@ async function main() {
     }
     
     case 'details': {
+      if (!requireOkxAuth()) break;
       if (!args[1]) {
         print('❌ 请提供 authorId，例如: node index.js details 61234567890,98765432101');
         process.exit(1);
@@ -136,21 +197,25 @@ async function main() {
     }
     
     case 'monitor': {
+      if (!requireOkxAuth()) break;
       await monitorPositions(appConfig, state);
       break;
     }
     
     case 'watch': {
+      if (!requireOkxAuth()) break;
       await startMonitorLoop(appConfig, state);
       break;
     }
     
     case 'signal': {
+      if (!requireOkxAuth()) break;
       await getSignalOverview(appConfig, state);
       break;
     }
     
     case 'trend': {
+      if (!requireOkxAuth()) break;
       if (!args[1]) {
         print('❌ 请提供币种，例如: node index.js trend BTC');
         process.exit(1);
@@ -163,11 +228,13 @@ async function main() {
     }
     
     case 'analyze': {
+      if (!requireOkxAuth()) break;
       await analyzeSignalChanges(appConfig, state);
       break;
     }
     
     case 'history': {
+      if (!requireOkxAuth()) break;
       if (!args[1]) {
         print('❌ 请提供 authorId，例如: node index.js history 61234567890');
         process.exit(1);
@@ -198,6 +265,7 @@ async function main() {
     }
     
     case 'list': {
+      if (!requireOkxAuth()) break;
       if (!state.watchlist || state.watchlist.length === 0) {
         print('⚠️  OKX 监控列表为空，请先运行 discover 命令');
       } else {
@@ -399,27 +467,32 @@ async function main() {
     // ==================== General ====================
     case 'status': {
       const { watchlist, traders, signals, lastDiscovery, lastMonitor } = state;
+      const okxAuth = checkOkxAuth();
       
       print(`\n📊 Smart Money Monitor 状态`);
       print(`${'='.repeat(50)}`);
       
-      print(`\n🔷 OKX Smart Money:`);
-      print(`  👥 监控交易员数: ${watchlist?.length || 0}`);
-      print(`  📈 已缓存信号: ${Object.keys(signals || {}).length} 个币种`);
-      print(`  🔍 上次发现: ${lastDiscovery ? formatTime(new Date(lastDiscovery)) : '从未'}`);
-      print(`  👀 上次监控: ${lastMonitor ? formatTime(new Date(lastMonitor)) : '从未'}`);
+      print(`\n🔷 OKX Smart Money: ${okxAuth.isAuthenticated ? '✅ 已认证' : '❌ 未认证'}`);
+      if (okxAuth.isAuthenticated) {
+        print(`  👥 监控交易员数: ${watchlist?.length || 0}`);
+        print(`  📈 已缓存信号: ${Object.keys(signals || {}).length} 个币种`);
+        print(`  🔍 上次发现: ${lastDiscovery ? formatTime(new Date(lastDiscovery)) : '从未'}`);
+        print(`  👀 上次监控: ${lastMonitor ? formatTime(new Date(lastMonitor)) : '从未'}`);
+      } else {
+        print(`  ⚠️  需要配置 OKX 认证才能使用`);
+      }
       
-      print(`\n⟠ EVM 链上:`);
+      print(`\n⟠ EVM 链上 (无需认证):`);
       print(`  🐋 巨鲸记录: ${state.evmWhales?.length || 0} 条`);
       print(`  👛 监控钱包: ${Object.keys(state.evmWallets || {}).length} 个`);
       print(`  🔍 上次扫描: ${state.lastEvmScan ? formatTime(new Date(state.lastEvmScan)) : '从未'}`);
       
-      print(`\n☀️ Solana:`);
+      print(`\n☀️ Solana (无需认证):`);
       print(`  🐋 巨鲸记录: ${state.solanaWhales?.length || 0} 条`);
       print(`  👛 监控钱包: ${Object.keys(state.solanaWallets || {}).length} 个`);
       print(`  🔍 上次扫描: ${state.lastSolanaScan ? formatTime(new Date(state.lastSolanaScan)) : '从未'}`);
       
-      print(`\n⚡ Hyperliquid:`);
+      print(`\n⚡ Hyperliquid (无需认证):`);
       print(`  📊 监控账户: ${Object.keys(state.hyperliquidAccounts || {}).length} 个`);
       print(`  📜 成交记录: ${Object.keys(state.hyperliquidFills || {}).length} 个账户`);
       print(`  📈 交易复盘: ${Object.keys(state.hyperliquidReviews || {}).length} 个账户`);

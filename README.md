@@ -6,23 +6,23 @@ Discover and monitor smart money wallets across multiple chains. Track top trade
 
 ## Features
 
-### OKX CEX Smart Money
+### OKX CEX Smart Money (Requires Authentication)
 - 🔍 **Trader Discovery** — Find top-performing traders by PnL, win rate, drawdown
 - 👀 **Position Monitoring** — Track traders' positions in real-time with change detection
 - 🧠 **Signal Analysis** — See what coins smart money is long/short on
 - 📈 **Trend Tracking** — Historical signal trends for specific coins
 
-### EVM Chain Whales (8 chains)
+### EVM Chain Whales (8 chains) — No Auth Required
 - 🐋 **Whale Detection** — Monitor large transfers across Ethereum, BSC, Base, Arbitrum, Polygon, Optimism, Avalanche, zkSync
 - 👛 **Wallet Monitoring** — Track wallet portfolios and balance changes
 - 🌐 **Multi-Chain Scan** — Scan same address across all 8 chains
 
-### Solana Whales
+### Solana Whales — No Auth Required
 - 🐋 **Whale Detection** — Monitor large SOL transfers
 - 👛 **Wallet Monitoring** — Track SPL token portfolios
 - 📊 **Token Analysis** — View token info and top holders
 
-### Hyperliquid DEX
+### Hyperliquid DEX — No Auth Required
 - 📊 **Account Monitoring** — Track trader positions and PnL
 - 📜 **Trade History** — View fill history and generate trade reviews
 - 💰 **Market Data** — Access markets, funding rates, and spot balances
@@ -35,9 +35,11 @@ Discover and monitor smart money wallets across multiple chains. Track top trade
 ## Prerequisites
 
 - Node.js 18+
-- OKX CLI (`npm install -g @okx_ai/okx-trade-cli`) — for OKX Smart Money features
 - Python 3.8+ — for blockchain skills (EVM, Solana, Hyperliquid)
-- OKX account with live trading access (demo mode not supported for Smart Money)
+- OKX CLI (`npm install -g @okx_ai/okx-trade-cli`) — **optional**, only for OKX Smart Money features
+- OKX account with live trading access — **optional**, demo mode not supported for Smart Money
+
+> **💡 Note**: EVM, Solana, and Hyperliquid features work without OKX authentication. Only OKX Smart Money features require authentication.
 
 ## Quick Start
 
@@ -47,21 +49,21 @@ cd smartmoney-monitor
 cp .env.example .env
 # Edit .env with your Telegram credentials (optional)
 
-# OKX Smart Money
-node index.js discover
-node index.js signal
-
-# EVM Whales
+# EVM Whales (no auth required)
 node index.js evm-whale
 node index.js evm-wallet 0xd8dA...96045
 
-# Solana Whales
+# Solana Whales (no auth required)
 node index.js sol-whale
 node index.js sol-wallet 9WzDX...
 
-# Hyperliquid
+# Hyperliquid (no auth required)
 node index.js hl-state 0xabc...
 node index.js hl-review 0xabc...
+
+# OKX Smart Money (requires authentication)
+node index.js discover
+node index.js signal
 
 # Check status
 node index.js status
@@ -69,7 +71,7 @@ node index.js status
 
 ## Command Reference
 
-### OKX Smart Money (CEX)
+### OKX Smart Money (CEX) — Requires Authentication
 
 | Command | Description |
 |---------|-------------|
@@ -83,7 +85,7 @@ node index.js status
 | `history <id>` | View trader's closed position history |
 | `list` | List all monitored traders |
 
-### EVM Chain Whales
+### EVM Chain Whales — No Auth Required
 
 | Command | Description |
 |---------|-------------|
@@ -92,7 +94,7 @@ node index.js status
 | `evm-multichain <address>` | Scan address across all 8 chains |
 | `evm-chains` | List supported EVM chains |
 
-### Solana Whales
+### Solana Whales — No Auth Required
 
 | Command | Description |
 |---------|-------------|
@@ -101,7 +103,7 @@ node index.js status
 | `sol-token <mint>` | View token info and top holders |
 | `sol-stats` | Solana network stats |
 
-### Hyperliquid DEX
+### Hyperliquid DEX — No Auth Required
 
 | Command | Description |
 |---------|-------------|
@@ -112,7 +114,7 @@ node index.js status
 | `hl-markets [--limit N]` | View market data |
 | `hl-funding <coin> [--hours N]` | View funding rates |
 
-### Wallet Watchlist
+### Wallet Watchlist — No Auth Required
 
 | Command | Description |
 |---------|-------------|
@@ -131,13 +133,10 @@ node index.js status
 
 ```bash
 # Telegram notifications (optional)
-TELEGRAM_BOT_TOKEN=
-TELE...n
-
-# Monitor interval (minutes)
+TELEGRAM_BOT_TOKEN=*** Monitor interval (minutes)
 MONITOR_INTERVAL=5
 
-# OKX Smart Money filters
+# OKX Smart Money filters (only needed if using OKX features)
 MIN_PNL=10000
 MIN_WIN_RATE=60
 MAX_DRAWDOWN=50

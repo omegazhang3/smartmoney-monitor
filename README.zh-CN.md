@@ -6,23 +6,23 @@
 
 ## 功能特性
 
-### OKX CEX 聪明钱
+### OKX CEX 聪明钱（需要认证）
 - 🔍 **交易员发现** — 按 PnL、胜率、回撤筛选顶级交易员
 - 👀 **持仓监控** — 实时追踪交易员持仓，自动检测变化
 - 🧠 **信号分析** — 查看聪明钱在哪些币上做多/做空
 - 📈 **趋势追踪** — 特定币种的历史信号趋势
 
-### EVM 链上巨鲸（8条链）
+### EVM 链上巨鲸（8条链）— 无需认证
 - 🐋 **巨鲸检测** — 监控 Ethereum、BSC、Base、Arbitrum、Polygon、Optimism、Avalanche、zkSync 大额转账
 - 👛 **钱包监控** — 追踪钱包持仓和余额变化
 - 🌐 **多链扫描** — 同时扫描 8 条链的同一地址
 
-### Solana 巨鲸
+### Solana 巨鲸 — 无需认证
 - 🐋 **巨鲸检测** — 监控大额 SOL 转账
 - 👛 **钱包监控** — 追踪 SPL 代币持仓
 - 📊 **代币分析** — 查看代币信息和大户持仓
 
-### Hyperliquid DEX
+### Hyperliquid DEX — 无需认证
 - 📊 **账户监控** — 追踪交易员持仓和盈亏
 - 📜 **交易历史** — 查看成交记录和生成交易复盘
 - 💰 **市场数据** — 获取市场行情、资金费率、现货余额
@@ -35,9 +35,11 @@
 ## 前置要求
 
 - Node.js 18+
-- OKX CLI (`npm install -g @okx_ai/okx-trade-cli`) — OKX 聪明钱功能需要
 - Python 3.8+ — 区块链 skills（EVM、Solana、Hyperliquid）需要
-- OKX 真实账户（Smart Money 不支持模拟盘）
+- OKX CLI (`npm install -g @okx_ai/okx-trade-cli`) — **可选**，仅 OKX 聪明钱功能需要
+- OKX 真实账户 — **可选**，Smart Money 不支持模拟盘
+
+> **💡 提示**: EVM、Solana、Hyperliquid 功能无需 OKX 认证。只有 OKX 聪明钱功能需要认证。
 
 ## 快速开始
 
@@ -47,21 +49,21 @@ cd smartmoney-monitor
 cp .env.example .env
 # 编辑 .env 填入 Telegram 配置（可选）
 
-# OKX 聪明钱
-node index.js discover
-node index.js signal
-
-# EVM 巨鲸
+# EVM 巨鲸（无需认证）
 node index.js evm-whale
 node index.js evm-wallet 0xd8dA...96045
 
-# Solana 巨鲸
+# Solana 巨鲸（无需认证）
 node index.js sol-whale
 node index.js sol-wallet 9WzDX...
 
-# Hyperliquid
+# Hyperliquid（无需认证）
 node index.js hl-state 0xabc...
 node index.js hl-review 0xabc...
+
+# OKX 聪明钱（需要认证）
+node index.js discover
+node index.js signal
 
 # 查看状态
 node index.js status
@@ -69,7 +71,7 @@ node index.js status
 
 ## 命令列表
 
-### OKX 聪明钱（CEX）
+### OKX 聪明钱（CEX）— 需要认证
 
 | 命令 | 说明 |
 |------|------|
@@ -83,7 +85,7 @@ node index.js status
 | `history <id>` | 查看交易员历史平仓 |
 | `list` | 查看 OKX 监控列表 |
 
-### EVM 链上巨鲸
+### EVM 链上巨鲸 — 无需认证
 
 | 命令 | 说明 |
 |------|------|
@@ -92,7 +94,7 @@ node index.js status
 | `evm-multichain <address>` | 多链扫描同一地址 |
 | `evm-chains` | 显示支持的 EVM 链 |
 
-### Solana 巨鲸
+### Solana 巨鲸 — 无需认证
 
 | 命令 | 说明 |
 |------|------|
@@ -101,7 +103,7 @@ node index.js status
 | `sol-token <mint>` | 查看代币信息和大户 |
 | `sol-stats` | Solana 网络状态 |
 
-### Hyperliquid DEX
+### Hyperliquid DEX — 无需认证
 
 | 命令 | 说明 |
 |------|------|
@@ -112,7 +114,7 @@ node index.js status
 | `hl-markets [--limit N]` | 查看市场数据 |
 | `hl-funding <coin> [--hours N]` | 查看资金费率 |
 
-### 钱包监控列表
+### 钱包监控列表 — 无需认证
 
 | 命令 | 说明 |
 |------|------|
@@ -131,7 +133,7 @@ node index.js status
 
 ```bash
 # Telegram 通知（可选）
-TELEGRAM_BOT_TOKEN=*** OKX 聪明钱筛选条件
+TELEGRAM_BOT_TOKEN=*** OKX 聪明钱筛选条件（仅使用 OKX 功能时需要）
 MIN_PNL=10000
 MIN_WIN_RATE=60
 MAX_DRAWDOWN=50
@@ -214,14 +216,14 @@ Skills 位于 `~/.hermes/skills/blockchain/`
 
 ### 1. 发现聪明钱
 ```bash
-# OKX CEX 交易员
-node index.js discover --limit 10
-
-# EVM 巨鲸
+# EVM 巨鲸（无需认证）
 node index.js evm-whale --min-usd 500000
 
-# Solana 巨鲸
+# Solana 巨鲸（无需认证）
 node index.js sol-whale --min-sol 5000
+
+# OKX CEX 交易员（需要认证）
+node index.js discover --limit 10
 ```
 
 ### 2. 监控特定钱包
