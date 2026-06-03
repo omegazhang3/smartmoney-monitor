@@ -36,7 +36,7 @@ const command = args[0];
 
 function printHelp() {
   print(`
-🧠 OKX Smart Money Monitor - 聪明钱发现与监控工具
+🧠 Smart Money Monitor - 聪明钱发现与监控工具
 ${'='.repeat(55)}
 
 用法: node index.js <command> [options]
@@ -132,7 +132,7 @@ async function main() {
     case 'status': {
       const { watchlist, traders, signals, lastDiscovery, lastMonitor } = state;
       
-      print(`\n📊 OKX Smart Money Monitor 状态`);
+      print(`\n📊 Smart Money Monitor 状态`);
       print(`${'='.repeat(40)}`);
       print(`👥 监控交易员数: ${watchlist?.length || 0}`);
       print(`📈 已缓存信号: ${Object.keys(signals || {}).length} 个币种`);

@@ -1,8 +1,8 @@
 [English](README.md) | [中文](README.zh-CN.md)
 
-# OKX Smart Money Monitor
+# Smart Money Monitor
 
-Discover and monitor smart money wallets on OKX. Track top traders' positions, detect changes in real-time, and get signals on what smart money is trading.
+Discover and monitor smart money wallets. Track top traders' positions, detect changes in real-time, and get signals on what smart money is trading.
 
 ## Features
 

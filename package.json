@@ -1,5 +1,5 @@
 {
-  "name": "okx-smartmoney-monitor",
+  "name": "smartmoney-monitor",
   "version": "1.0.0",
   "description": "OKX Smart Money wallet discovery and monitoring tool",
   "main": "index.js",
